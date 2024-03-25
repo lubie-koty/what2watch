@@ -5,10 +5,10 @@ from fastapi.security import APIKeyHeader
 
 from app.core.config import Settings
 
-api_key_header = APIKeyHeader(name='X-API-KEY')
+api_key_header = APIKeyHeader(name='Sec-WebSocket-Protocol')
 
 
-def api_key_check(api_key: Annotated[str, Security(api_key_header)]) -> str:
+def api_key_check(api_key: str = Security(api_key_header)) -> str:
     if not api_key == Settings.API_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

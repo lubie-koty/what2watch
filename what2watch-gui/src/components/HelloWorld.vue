@@ -1,38 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { Ref, onMounted, ref } from 'vue'
 
-defineProps<{ msg: string }>()
+const chatURI = import.meta.env.VITE_CHAT_WS_URI
+const apiKey = import.meta.env.VITE_API_KEY
 
-const count = ref(0)
+const messages: Ref<string[]> = ref([])
+const message: Ref<string> = ref('')
+const webSocket: Ref<WebSocket | undefined> = ref()
+
+function sendMessage() {
+    if (!message.value.trim()) {
+        return
+    }
+    webSocket.value!.send(message.value)
+    message.value = ''
+}
+
+onMounted(() => {
+    webSocket.value = new WebSocket(`${chatURI}?key=${apiKey}`)
+    webSocket.value.onmessage = (ev) => {
+        messages.value.push(ev.data)
+    }
+})
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
-
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
-    </p>
-  </div>
-
-  <p>
-    Check out
-    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
-      >create-vue</a
-    >, the official Vue + Vite starter
-  </p>
-  <p>
-    Install
-    <a href="https://github.com/vuejs/language-tools" target="_blank">Volar</a>
-    in your IDE for a better DX
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
+    <input type="text" v-model="message">
+    <button type="button" @click="sendMessage">send</button>
+    <br>
+    <ul>
+        <li v-for="msg in messages">
+            {{ msg }}
+        </li>
+    </ul>
 </template>
-
-<style scoped>
-.read-the-docs {
-  color: #888;
-}
-</style>
