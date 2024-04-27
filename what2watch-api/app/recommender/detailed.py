@@ -3,10 +3,13 @@ from ast import literal_eval
 import numpy as np
 import pandas as pd
 
+from fastapi import HTTPException, status
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from app.recommender import DATA_PATH
+from app.schemas.recommendations import TitleList
+from app.utils.input import parse_input_title
 
 
 def _get_director(data) -> str | float:
@@ -38,7 +41,7 @@ class DetailedRecommender:
     def __load_detailed_recommender(self) -> None:
         count_vectorizer = CountVectorizer(stop_words='english')
         metadata = pd.read_csv(f'{DATA_PATH}/movies_metadata.csv', low_memory=False)
-        # metadata = metadata.drop([19730, 29503, 35587])
+        metadata = metadata.drop([19730, 29503, 35587])
         movie_credits = pd.read_csv(f'{DATA_PATH}/credits.csv')
         keywords = pd.read_csv(f'{DATA_PATH}/keywords.csv')
 
@@ -58,14 +61,18 @@ class DetailedRecommender:
 
         count_matrix = count_vectorizer.fit_transform(metadata['soup'])
         metadata = metadata.reset_index()
-        self.cosine_similarity = cosine_similarity(count_matrix, count_matrix)
-        self.indices = pd.Series(metadata.index, index=metadata['title'])
-        self.dataset = metadata
+        self.__cosine_similarity = cosine_similarity(count_matrix, count_matrix)
+        self.__indices = pd.Series(metadata.index, index=metadata['title']).drop(labels=np.nan)
+        self.__dataset = metadata  
 
-
-    def get_recommendations(self, title: str) -> pd.DataFrame:
-        movie_index = self.indices[title]
-        similar_scores = list(enumerate(self.cosine_similarity[movie_index]))
+    def get_recommendations(self, title: str) -> TitleList:
+        parsed_title = parse_input_title(title, self.__indices)
+        try:
+            movie_index = self.__indices[parsed_title]
+        except KeyError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f'Could not find recommendation for "{title}"'
+            )
+        similar_scores = list(enumerate(self.__cosine_similarity[movie_index]))
         similar_scores = sorted(similar_scores, key=lambda x: np.any(x[1]), reverse=True)
-        return self.dataset['title'].iloc[[i[0] for i in similar_scores[1:10]]]
-
+        return TitleList(titles=list(self.__dataset['title'].iloc[[i[0] for i in similar_scores[1:10]]]))
