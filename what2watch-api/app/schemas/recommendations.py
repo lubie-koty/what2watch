@@ -11,5 +11,7 @@ class RecommendationList(BaseModel):
     recommendations: list[Recommendation]
 
 
-class TitleList(BaseModel):
-    titles: list[str]
+class ChatResponse(BaseModel):
+    is_successful: bool
+    error_message: str | None
+    data: list[str] | None

@@ -8,7 +8,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from app.recommender import DATA_PATH
-from app.schemas.recommendations import TitleList
+from app.schemas.recommendations import ChatResponse
 from app.utils.input import parse_input_title
 
 
@@ -65,14 +65,18 @@ class DetailedRecommender:
         self.__indices = pd.Series(metadata.index, index=metadata['title']).drop(labels=np.nan)
         self.__dataset = metadata  
 
-    def get_recommendations(self, title: str) -> TitleList:
+    def get_recommendations(self, title: str) -> ChatResponse:
         parsed_title = parse_input_title(title, self.__indices)
         try:
             movie_index = self.__indices[parsed_title]
         except KeyError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f'Could not find recommendation for "{title}"'
+            return ChatResponse(
+                is_successful=False,
+                error_message=f'Could not find recommendation for "{title}"'
             )
         similar_scores = list(enumerate(self.__cosine_similarity[movie_index]))
         similar_scores = sorted(similar_scores, key=lambda x: np.any(x[1]), reverse=True)
-        return TitleList(titles=list(self.__dataset['title'].iloc[[i[0] for i in similar_scores[1:10]]]))
+        return ChatResponse(
+            is_successful=True,
+            data=list(self.__dataset['title'].iloc[[i[0] for i in similar_scores[1:10]]])
+        )
