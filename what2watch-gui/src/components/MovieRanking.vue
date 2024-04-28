@@ -1,23 +1,36 @@
 <script setup lang="ts">
-import { Ref, ref } from 'vue'
+import { Ref, onMounted, ref } from 'vue'
 import { routes } from '../routes'
+import { Recommendation } from '../schemas/recommendations' 
 
-const api_key = import.meta.env.VITE_API_KEY
+const apiKey = import.meta.env.VITE_API_KEY
 
-const messages: Ref<string[]> = ref([])
-const message: Ref<string> = ref('')
-const webSocket: Ref<WebSocket | undefined> = ref()
+const recommendations: Ref<Recommendation[] | undefined> = ref()
 
 async function requestRanking() {
-    const response = await fetch(routes.simpleRanking, {
-        headers: {
-            'X-API-KEY': api_key
+    const response = await fetch(
+        `${routes.simpleRanking}?number_of_movies=4`,
+        {
+            headers: {
+                'X-API-KEY': apiKey
+            }
         }
-    })
-    
+    )
+    const data = await response.json()
+    recommendations.value = data.recommendations
 }
+
+onMounted(async () => {
+    await requestRanking()
+})
 </script>
 
 <template>
-    
+<div v-for="(recommendation, index) in recommendations">
+    {{index}} - {{ recommendation.title }}
+</div>
 </template>
+
+<style scoped>
+
+</style>

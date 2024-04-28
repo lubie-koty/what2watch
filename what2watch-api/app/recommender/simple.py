@@ -33,11 +33,11 @@ class SimpleRecommender:
         return RecommendationList(
             recommendations=[
                 Recommendation(
-                    title=r['title'],
-                    vote_count=r['vote_count'],
-                    vote_average=r['vote_average'],
-                    score=r['score']
+                    title=r.title,
+                    vote_count=r.vote_count,
+                    vote_average=r.vote_average,
+                    score=r.score
                 )
-                for r in recommendations
+                for r in recommendations.itertuples()
             ]
         )
