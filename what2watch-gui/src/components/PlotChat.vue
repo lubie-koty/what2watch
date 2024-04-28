@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { Ref, onMounted, ref } from 'vue'
-
-const chatURI = import.meta.env.VITE_CHAT_WS_URI
-const apiKey = import.meta.env.VITE_API_KEY
+import { routes } from '../routes'
 
 const messages: Ref<string[]> = ref([])
 const message: Ref<string> = ref('')
@@ -17,7 +15,7 @@ function sendMessage() {
 }
 
 onMounted(() => {
-    webSocket.value = new WebSocket(`${chatURI}?key=${apiKey}`)
+    webSocket.value = new WebSocket(routes.plotChat)
     webSocket.value.onmessage = (ev) => {
         messages.value.push(ev.data)
     }

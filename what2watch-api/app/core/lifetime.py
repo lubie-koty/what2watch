@@ -8,8 +8,8 @@ from app.recommender.simple import SimpleRecommender
 
 
 def load_recommenders(app: FastAPI) -> None:
-    # detailed_recommender = DetailedRecommender()
-    # app.state.detailed_recommender = detailed_recommender
+    detailed_recommender = DetailedRecommender()
+    app.state.detailed_recommender = detailed_recommender
     plot_recommender = PlotRecommender()
     app.state.plot_recommender = plot_recommender
     simple_recommender = SimpleRecommender()
@@ -20,4 +20,3 @@ def load_recommenders(app: FastAPI) -> None:
 async def lifespan(app: FastAPI):
     load_recommenders(app)
     yield
-    # clear ML models
