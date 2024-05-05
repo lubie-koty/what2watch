@@ -49,7 +49,7 @@ const numberOfMoviesSelected: Ref<number> = ref(10);
 
 <style scoped>
 .container {
-  min-width: 50vw;
+  min-width: 60vw;
   min-height: 70vh;
   display: grid;
   grid-template-columns: 30% auto;

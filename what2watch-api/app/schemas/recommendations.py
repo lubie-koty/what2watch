@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class Recommendation(BaseModel):
     title: str
     vote_count: int
@@ -13,5 +14,5 @@ class RecommendationList(BaseModel):
 
 class ChatResponse(BaseModel):
     is_successful: bool
-    error_message: str | None
-    data: list[str] | None
+    error_message: str | None = None
+    data: list[str] | None = None

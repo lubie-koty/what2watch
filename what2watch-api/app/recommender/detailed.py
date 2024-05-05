@@ -72,7 +72,7 @@ class DetailedRecommender:
         except KeyError:
             return ChatResponse(
                 is_successful=False,
-                error_message=f'Could not find recommendation for "{title}"'
+                error_message=f'Could not find recommendations for "{title}"'
             )
         similar_scores = list(enumerate(self.__cosine_similarity[movie_index]))
         similar_scores = sorted(similar_scores, key=lambda x: np.any(x[1]), reverse=True)

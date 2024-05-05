@@ -28,11 +28,11 @@ class PlotRecommender:
     def get_recommendations(self, title: str) -> ChatResponse:
         parsed_title = parse_input_title(title, self.__indices)
         try:
-            movie_index = self.indices[parsed_title]
+            movie_index = self.__indices[parsed_title]
         except KeyError:
             return ChatResponse(
                 is_successful=False,
-                error_message=f'Could not find recommendation for "{title}"'
+                error_message=f'Could not find recommendations for "{title}"'
             )
         similar_scores = list(enumerate(self.__cosine_similarity[movie_index]))
         similar_scores = sorted(similar_scores, key=lambda x: np.any(x[1]), reverse=True)
